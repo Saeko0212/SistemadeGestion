@@ -1,26 +1,26 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import Productos from './src/views/Productos';  // Vista original con lógica de productos (Firebase CRUD)
-import Promedio from './src/views/Promedio';    // Nueva vista con lógica similar (Firebase CRUD + fetch a AWS para promedio)
-
-const Stack = createStackNavigator();
+import React, { useEffect, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { View } from "react-native";
+import { auth } from "./src/database/firebaseconfig.js";
+import Login from "./src/views/Login.js";
+import Navegacion from './Navegacion.js';
 
 export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Productos">  
-        <Stack.Screen 
-          name="Productos" 
-          component={Productos} 
-          options={{ title: 'Gestión de Productos' }} 
-        />
-        <Stack.Screen 
-          name="Promedio" 
-          component={Promedio} 
-          options={{ title: 'Gestión de Promedios (Edades)' }} 
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+    const [usuario, setUsuario] = useState(null);
+
+    useEffect(() => {
+        // Escucha los cambios en la autenticación (login/logout)
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setUsuario(user);
+        });
+        return unsubscribe;
+    }, []);
+
+    if (!usuario) {
+        // Si no hay usuario autenticado, mostrar login
+        return <Login />;
+    }
+
+    // Si hay usuario autenticado, mostrar la navegación completa
+    return <Navegacion />;
 }

@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Text } from 'react-native';
+import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { db } from '../database/firebaseconfig';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
-import FormularioPromedio from '../components/FormularioPromedio';  // Asume que creas este componente similar a FormularioProductos
-import TablaPromedio from '../components/TablaPromedio';  // Asume que creas este componente similar a TablaProductos
-import TituloPromedio from '../components/TituloPromedio';  // Importa el componente de título con promedio
+import FormularioPromedio from '../components/FormularioPromedio'; 
+import TablaPromedio from '../components/TablaPromedio';  
+import TituloPromedio from '../components/TituloPromedio';  
 
 const Promedio = () => {
-  const [edades, setEdades] = useState([]);  // Lista de {id, nombre, edad}
-  const [promedio, setPromedio] = useState(null);  // Estado para el promedio calculado vía AWS
+  const [edades, setEdades] = useState([]);  
+  const [promedio, setPromedio] = useState(null);  
+  const navigation = useNavigation();
 
   const cargarDatos = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'edades'));  // Colección 'edades' en Firebase
+      const querySnapshot = await getDocs(collection(db, 'edades')); 
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setEdades(data);
 
-      // Si hay datos, calcula el promedio vía API en la nube (fetch como en la guía del PDF)
+     
       if (data.length > 0) {
         const edadesArray = data.map((item) => item.edad);
         await calcularPromedioAPI(edadesArray);
@@ -31,7 +33,7 @@ const Promedio = () => {
     }
   };
 
-  // Función para fetch a AWS Lambda + API Gateway (PDF: flujo general, método POST con body JSON)
+ 
   const calcularPromedioAPI = async (listaEdades) => {
     try {
       const response = await fetch('https://q4ws8tftq3.execute-api.us-east-2.amazonaws.com/calcularpromedio', {  // Reemplaza con tu URL real
@@ -44,18 +46,18 @@ const Promedio = () => {
         throw new Error(`Error HTTP: ${response.status}`);
       }
 
-      const data = await response.json();  // Procesa respuesta como objeto (PDF: .json() para datos)
-      setPromedio(data.promedio);  // Asume respuesta { "promedio": "30.00" }
+      const data = await response.json();  
+      setPromedio(data.promedio);  
     } catch (error) {
       console.error('Error al calcular promedio en API:', error);
-      setPromedio(null);  // Fallback si falla la nube
+      setPromedio(null);  
     }
   };
 
   const eliminarEdad = async (id) => {
     try {
       await deleteDoc(doc(db, 'edades', id));
-      cargarDatos();  // Recarga y recalcula promedio
+      cargarDatos();  
     } catch (error) {
       console.error('Error al eliminar:', error);
     }
@@ -66,20 +68,20 @@ const Promedio = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.mainTitle}>Sistema de Gestión</Text>
-          <Text style={styles.subtitle}>Promedios (Edades)</Text>
-          {/* Integra el componente TituloPromedio para mostrar el promedio de forma destacada */}
-          <TituloPromedio promedio={promedio} />
-        </View>
-        
-        <FormularioPromedio cargarDatos={cargarDatos} />  {/* Similar a FormularioProductos, pero para nombre/edad */}
-        <TablaPromedio edades={edades} eliminarEdad={eliminarEdad} />  {/* Similar a TablaProductos, muestra tabla de edades */}
+  <SafeAreaView style={styles.safeArea}>
+    <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.mainTitle}>Sistema de Gestión</Text>
+        <Text style={styles.subtitle}>Promedios (Edades)</Text>
+        {/* Tu TituloPromedio sigue aquí */}
+        <TituloPromedio promedio={promedio} />
       </View>
-    </SafeAreaView>
-  );
+      
+      <FormularioPromedio cargarDatos={cargarDatos} />
+      <TablaPromedio edades={edades} eliminarEdad={eliminarEdad} />
+    </View>
+  </SafeAreaView>
+);
 };
 
 const styles = StyleSheet.create({

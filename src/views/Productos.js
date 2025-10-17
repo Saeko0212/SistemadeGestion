@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity } from 'react-native';  // ← Import único: todo en uno, sin duplicados
+import { View, StyleSheet, SafeAreaView, Text } from 'react-native';  // ← Import único: todo en uno, sin duplicados
 import { useNavigation } from '@react-navigation/native';  // Para navegar a Promedio
 import { db } from '../database/firebaseconfig';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
@@ -37,25 +37,18 @@ const Productos = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.mainTitle}>Sistema de Gestión</Text>
-          <Text style={styles.subtitle}>Productos</Text>
-          {/* Botón para navegar a Promedio (práctica: integra fetch a AWS) */}
-          <TouchableOpacity 
-            style={styles.navButton} 
-            onPress={() => navigation.navigate('Promedio')}
-          >
-            <Text style={styles.navButtonText}>Ir a Promedios (Edades)</Text>
-          </TouchableOpacity>
-        </View>
-        
-        <FormularioProductos cargarDatos={cargarDatos} />
-        <TablaProductos productos={productos} eliminarProducto={eliminarProducto} />
+  <SafeAreaView style={styles.safeArea}>
+    <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.mainTitle}>Sistema de Gestión</Text>
+        <Text style={styles.subtitle}>Productos</Text>
       </View>
-    </SafeAreaView>
-  );
+      
+      <FormularioProductos cargarDatos={cargarDatos} />
+      <TablaProductos productos={productos} eliminarProducto={eliminarProducto} />
+    </View>
+  </SafeAreaView>
+);
 };
 
 const styles = StyleSheet.create({
@@ -101,29 +94,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textTransform: 'uppercase',
     letterSpacing: 3,
-  },
-  // Estilos nuevos para el botón de navegación
-  navButton: {
-    backgroundColor: '#ff6b35',  // Naranja para resaltar
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginTop: 10,
-    borderWidth: 1.5,
-    borderColor: '#e94560',
-    shadowColor: '#ff6b35',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-  navButtonText: {
-    color: '#ffffff',
-    fontWeight: '700',
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-    textAlign: 'center',
   },
 });
 

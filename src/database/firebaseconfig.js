@@ -1,38 +1,36 @@
+// src/database/firebaseconfig.js
+
 import { initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import Constants from 'expo-constants';
-import 'react-native-get-random-values'; // Para compatibilidad con crypto en React Native
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeAuth, getReactNativePersistence, browserLocalPersistence } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-// Obtén la config de Expo (de app.config.js)
-const { extra } = Constants.expoConfig || {}; // Fallback si no está disponible
-
-// Configuración de Firebase (debe coincidir con app.config.js)
+// Tus credenciales de Firebase van aquí
 const firebaseConfig = {
-  apiKey: extra?.firebase?.apiKey,
-  authDomain: extra?.firebase?.authDomain,
-  projectId: extra?.firebase?.projectId,
-  storageBucket: extra?.firebase?.storageBucket,
-  messagingSenderId: extra?.firebase?.messagingSenderId,
-  appId: extra?.firebase?.appId,
-  measurementId: extra?.firebase?.measurementId, // Opcional para Analytics
+  apiKey: process.env.EXPO_PUBLIC_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_MEASUREMENT_ID
 };
-
-// Verifica que la config esté cargada
-if (!firebaseConfig?.apiKey) {
-  throw new Error('Configuración de Firebase no encontrada. Verifica app.config.js y .env.');
-}
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
-
-// Inicializar Auth con persistencia local (usa AsyncStorage para guardar sesión)
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-});
-
-// Inicializar Firestore
 const db = getFirestore(app);
 
-export { app, auth, db };
+// --- INICIO DE LA CORRECCIÓN ---
+
+// Inicializar Auth con persistencia condicional
+// Esto soluciona el error en la web
+const auth = initializeAuth(app, {
+  persistence: Platform.OS === 'web'
+    ? browserLocalPersistence  // Usar persistencia del navegador para la web
+    : getReactNativePersistence(AsyncStorage) // Usar AsyncStorage para nativo
+});
+
+// --- FIN DE LA CORRECCIÓN ---
+
+export { db, auth };
