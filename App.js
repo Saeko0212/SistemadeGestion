@@ -19,6 +19,7 @@ export default function App() {
     if (!usuario) {
         // Si no hay usuario autenticado, mostrar login
         return <Login />;
+
     }
 
     // Si hay usuario autenticado, mostrar la navegación completa
