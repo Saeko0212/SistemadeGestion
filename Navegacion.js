@@ -13,6 +13,7 @@ import { signOut } from "firebase/auth";
 import Productos from './src/views/Productos.js';
 import Promedio from './src/views/Promedio.js';
 import Usuarios from './src/views/Usuarios.js';
+import ActividadesFirestoreScreen from './src/views/ActividadesFirestoreScreen.js';
 
 const Tab = createBottomTabNavigator();
 function Mytabs() {
@@ -48,6 +49,15 @@ function Mytabs() {
                 )
             }}
             />
+            <Tab.Screen 
+                name="Actividades" 
+                component={ActividadesFirestoreScreen} 
+                options={{
+                    tabBarLabel: 'Actividades',
+                    tabBarIcon: ({ color, size }) => (
+                        <FontAwesome name="tasks" size={30} color={color} />
+                    ),
+                }} />
             <Tab.Screen 
                 name="Logout"
                 // No renderiza un componente, solo ejecuta una acción

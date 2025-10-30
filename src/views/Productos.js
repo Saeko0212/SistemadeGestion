@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Text } from 'react-native';  // ← Import único: todo en uno, sin duplicados
-import { useNavigation } from '@react-navigation/native';  // Para navegar a Promedio
+import { View, StyleSheet, SafeAreaView, Text } from 'react-native'; 
+import { useNavigation } from '@react-navigation/native';  
 import { db } from '../database/firebaseconfig';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import FormularioProductos from '../components/FormularioProductos';

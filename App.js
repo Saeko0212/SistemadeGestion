@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { View } from "react-native";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./src/database/firebaseconfig.js";
 import Login from "./src/views/Login.js";
 import Navegacion from './Navegacion.js';
@@ -10,7 +9,7 @@ export default function App() {
 
     useEffect(() => {
         // Escucha los cambios en la autenticación (login/logout)
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, user => {
             setUsuario(user);
         });
         return unsubscribe;
@@ -19,7 +18,6 @@ export default function App() {
     if (!usuario) {
         // Si no hay usuario autenticado, mostrar login
         return <Login />;
-
     }
 
     // Si hay usuario autenticado, mostrar la navegación completa
