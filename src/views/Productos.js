@@ -9,6 +9,16 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as Clipboard from "expo-clipboard";
 
+const arrayBufferToBase64 = (buffer) => {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+};
+
 const Productos = () => {
   const [productos, setProductos] = useState([]);
   const navigation = useNavigation();  
@@ -75,6 +85,50 @@ const Productos = () => {
       Alert.alert("Error", "Ocurrió un error al exportar o compartir: " + error.message);
     }
   };
+
+  const generarExcel = async () => {
+    try {
+      if (productos.length === 0) {
+        alert("No hay productos para generar el reporte.");
+        return;
+      }
+  
+      console.log("Productos para Excel:", productos);
+  
+      const response = await fetch("https://xba16ydjga.execute-api.us-east-2.amazonaws.com/generarexcel", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ datos: productos }) 
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+  
+      // 3. Recibir, convertir y guardar el archivo
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = arrayBufferToBase64(arrayBuffer);
+      const fileUri = FileSystem.documentDirectory + "reporte_productos.xlsx";
+  
+      await FileSystem.writeAsStringAsync(fileUri, base64, {
+        encoding: FileSystem.EncodingType.Base64
+      });
+  
+      // 4. Abrir el menú "Compartir"
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          dialogTitle: 'Descargar Reporte de Productos'
+        });
+      } else {
+        alert("La función de compartir no está disponible en este dispositivo.");
+      }
+  
+    } catch (error) {
+      console.error("Error generando Excel:", error);
+      alert("Error al generar el reporte de Excel: " + error.message);
+    }
+  };
   const indiceDelUltimoElemento = paginaActual * elementosPorPagina;
   const indiceDelPrimerElemento = indiceDelUltimoElemento - elementosPorPagina;
   const productosPaginados = productos.slice(
@@ -93,9 +147,14 @@ const Productos = () => {
       {}
       <View style={styles.exportButtonContainer}>
         <Button 
-          title="Exportar Datos .txt"
+          title="Exportar y Copiar (JSON)"
           onPress={exportarYCopiarDatos}
           color="#ff6b35"
+        />
+        <Button 
+          title="Generar Reporte (Excel)" 
+          onPress={generarExcel}
+          color="#28a745" 
         />
       </View>
 
@@ -160,6 +219,7 @@ const styles = StyleSheet.create({
   exportButtonContainer: {
     marginHorizontal: 8,
     marginBottom: 15,
+    gap: 10, 
   },
 });
 

@@ -18,13 +18,8 @@ const TablaProductos = ({
       <View style={[styles.cell, styles.priceColumn]}>
         <Text style={styles.priceText}>${item.precio}</Text>
       </View>
-      <View style={[styles.cell, styles.stockColumn]}>
-        <Text style={[styles.stockText, 
-          item.stock > 10 ? styles.stockHigh : 
-          item.stock > 0 ? styles.stockMedium : styles.stockLow
-        ]}>
-          {item.stock}
-        </Text>
+      <View style={[styles.cell, styles.categoryColumn]}>
+        <Text style={styles.categoryText}>{item.Categoría}</Text>
       </View>
       <View style={[styles.cell, styles.actionColumn]}>
         <BotonEliminarProducto id={item.id} eliminarProducto={eliminarProducto} />
@@ -38,7 +33,7 @@ const TablaProductos = ({
         <View style={styles.headerRow}>
           <Text style={[styles.cell, styles.headerText, styles.nameColumn]}>Nombre</Text>
           <Text style={[styles.cell, styles.headerText, styles.priceColumn]}>Precio</Text>
-          <Text style={[styles.cell, styles.headerText, styles.stockColumn]}>Stock</Text>
+          <Text style={[styles.cell, styles.headerText, styles.categoryColumn]}>Categoría</Text>
           <Text style={[styles.cell, styles.headerText, styles.actionColumn]}>Acciones</Text>
         </View>
         <FlatList
@@ -74,23 +69,14 @@ const styles = StyleSheet.create({
   headerText: { fontSize: 12, fontWeight: '800', textAlign: 'center', letterSpacing: 0.8 },
   nameColumn: { width: 120, color: '#ffffff' },
   priceColumn: { width: 80, alignItems: 'center' },
-  stockColumn: { width: 60, alignItems: 'center' },
+  categoryColumn: { width: 100, textAlign: 'center', color: '#ffffff' },
   actionColumn: { width: 100, alignItems: 'center' },
 nameColumn: {
   width: 120,
   color: '#ffffff', // fuerza el blanco
 },
   priceText: { fontSize: 10, paddingHorizontal: 8, paddingVertical: 4, color: '#ffffff', backgroundColor: '#ff6b35' }, 
-  stockText: { fontSize: 10, paddingHorizontal: 6, paddingVertical: 4, color: '#ffffff' },
-  stockHigh: {
-    backgroundColor: '#28a745', // Verde para stock alto
-  },
-  stockMedium: {
-    backgroundColor: '#ffc107', // Amarillo para stock medio
-  },
-  stockLow: {
-    backgroundColor: '#dc3545', // Rojo para stock bajo o agotado
-  },
+  categoryText: { fontSize: 10, color: '#ffffff' },
   textoVacio: {
     color: '#999',
     textAlign: 'center',

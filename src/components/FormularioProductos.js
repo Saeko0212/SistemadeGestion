@@ -6,22 +6,19 @@ import { collection, addDoc } from 'firebase/firestore';
 const FormularioProductos = ({ cargarDatos }) => {
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [stock, setStock] = useState('');
+  const [categoria, setCategoria] = useState('');
 
   const guardarProducto = async () => {
     try {
       await addDoc(collection(db, 'productos'), {
         nombre: nombre,
         precio: parseFloat(precio),
-        descripcion: descripcion,
-        stock: parseInt(stock),
+        Categoría: categoria, // Usamos 'C' mayúscula para consistencia
       });
       alert('Producto agregado con éxito');
       setNombre('');
       setPrecio('');
-      setDescripcion('');
-      setStock('');
+      setCategoria('');
       cargarDatos();
     } catch (error) {
       alert('Error al registrar el producto:', error);
@@ -37,7 +34,7 @@ const FormularioProductos = ({ cargarDatos }) => {
       <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
-          placeholder="🏷️ Nombre del producto"
+          placeholder="🏷️ Nombre"
           placeholderTextColor="#8892b0"
           value={nombre}
           onChangeText={setNombre}
@@ -51,13 +48,12 @@ const FormularioProductos = ({ cargarDatos }) => {
           keyboardType="numeric"
         />
 
-        <TextInput
+        <TextInput          
           style={styles.input}
-          placeholder="📦 Stock"
+          placeholder="🏷️ Categoría"
           placeholderTextColor="#8892b0"
-          value={stock}
-          onChangeText={setStock}
-          keyboardType="numeric"
+          value={categoria}
+          onChangeText={setCategoria}
         />
         <View style={styles.buttonContainer}>
           <Button title="💾 GUARDAR PRODUCTO" onPress={guardarProducto} color="#e94560" />
