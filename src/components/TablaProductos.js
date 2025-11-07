@@ -1,55 +1,66 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import BotonEliminarProducto from './BotonEliminarProducto';
+import Paginacion from './Paginacion';
 
-const TablaProductos = ({ productos, eliminarProducto }) => {
-  return (
-<View style={styles.table}>
-  <View style={styles.headerRow}>
-    <Text style={[styles.cell, styles.headerText, styles.nameColumn]}>Nombre</Text>
-    <Text style={[styles.cell, styles.headerText, styles.priceColumn]}>Precio</Text>
-    <Text style={[styles.cell, styles.headerText, styles.stockColumn]}>Stock</Text>
-    <Text style={[styles.cell, styles.headerText, styles.actionColumn]}>Acciones</Text>
-  </View>
+const TablaProductos = ({ 
+  productos, 
+  eliminarProducto,
+  totalElementos,
+  elementosPorPagina,
+  paginaActual,
+  establecerPaginaActual,
+}) => {
 
-  <ScrollView style={styles.tableBody} showsVerticalScrollIndicator={false}>
-    {productos.map((producto, index) => (
-      <View style={[styles.row, index % 2 === 0 && styles.evenRow]} key={producto.id}>
-        <Text style={[styles.cell, styles.nameColumn, { color: '#ffffff' }]} numberOfLines={2}>{producto.nombre}</Text>
-        <View style={[styles.cell, styles.priceColumn]}>
-          <Text style={styles.priceText}>${producto.precio}</Text>
-        </View>
-        <View style={[styles.cell, styles.stockColumn]}>
-          <Text style={[styles.stockText, 
-            producto.stock > 10 ? styles.stockHigh : 
-            producto.stock > 0 ? styles.stockMedium : styles.stockLow
-          ]}>
-            {producto.stock}
-          </Text>
-        </View>
-        <View style={[styles.cell, styles.actionColumn]}>
-          <BotonEliminarProducto id={producto.id} eliminarProducto={eliminarProducto} />
-        </View>
+  const renderItem = ({ item, index }) => (
+    <View style={[styles.row, index % 2 === 0 && styles.evenRow]} key={item.id}>
+      <Text style={[styles.cell, styles.nameColumn, { color: '#ffffff' }]} numberOfLines={2}>{item.nombre}</Text>
+      <View style={[styles.cell, styles.priceColumn]}>
+        <Text style={styles.priceText}>${item.precio}</Text>
       </View>
-    ))}
-  </ScrollView>
-</View>
+      <View style={[styles.cell, styles.stockColumn]}>
+        <Text style={[styles.stockText, 
+          item.stock > 10 ? styles.stockHigh : 
+          item.stock > 0 ? styles.stockMedium : styles.stockLow
+        ]}>
+          {item.stock}
+        </Text>
+      </View>
+      <View style={[styles.cell, styles.actionColumn]}>
+        <BotonEliminarProducto id={item.id} eliminarProducto={eliminarProducto} />
+      </View>
+    </View>
+  );
 
+  return (
+    <View style={styles.container}>
+      <View style={styles.table}>
+        <View style={styles.headerRow}>
+          <Text style={[styles.cell, styles.headerText, styles.nameColumn]}>Nombre</Text>
+          <Text style={[styles.cell, styles.headerText, styles.priceColumn]}>Precio</Text>
+          <Text style={[styles.cell, styles.headerText, styles.stockColumn]}>Stock</Text>
+          <Text style={[styles.cell, styles.headerText, styles.actionColumn]}>Acciones</Text>
+        </View>
+        <FlatList
+          style={styles.tableBody}
+          data={productos}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={<Text style={styles.textoVacio}>No hay productos para mostrar.</Text>}
+        />
+      </View>
+      <Paginacion
+        totalElementos={totalElementos}
+        elementosPorPagina={elementosPorPagina}
+        paginaActual={paginaActual}
+        establecerPaginaActual={establecerPaginaActual}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#16213e',
-
-    margin: 8,
-    borderWidth: 2,
-    borderColor: '#e94560',
-    shadowColor: '#e94560',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 12,
     flex: 1,
   },
   header: { paddingVertical: 12, paddingHorizontal: 12, borderBottomWidth: 2, borderBottomColor: '#e94560' },
@@ -61,7 +72,7 @@ const styles = StyleSheet.create({
   evenRow: { backgroundColor: '#0f0f23' },
   cell: { paddingHorizontal: 10, paddingVertical: 6, fontSize: 12 },
   headerText: { fontSize: 12, fontWeight: '800', textAlign: 'center', letterSpacing: 0.8 },
-  nameColumn: { width: 120 },
+  nameColumn: { width: 120, color: '#ffffff' },
   priceColumn: { width: 80, alignItems: 'center' },
   stockColumn: { width: 60, alignItems: 'center' },
   actionColumn: { width: 100, alignItems: 'center' },
@@ -69,9 +80,23 @@ nameColumn: {
   width: 120,
   color: '#ffffff', // fuerza el blanco
 },
-
-priceText: { fontSize: 10, paddingHorizontal: 8, paddingVertical: 4, color: '#ffffff', backgroundColor: '#ff6b35' }, // blanco
-  stockText: { fontSize: 10, paddingHorizontal: 6, paddingVertical: 4, color: '#ffffff' }, // blanco
+  priceText: { fontSize: 10, paddingHorizontal: 8, paddingVertical: 4, color: '#ffffff', backgroundColor: '#ff6b35' }, 
+  stockText: { fontSize: 10, paddingHorizontal: 6, paddingVertical: 4, color: '#ffffff' },
+  stockHigh: {
+    backgroundColor: '#28a745', // Verde para stock alto
+  },
+  stockMedium: {
+    backgroundColor: '#ffc107', // Amarillo para stock medio
+  },
+  stockLow: {
+    backgroundColor: '#dc3545', // Rojo para stock bajo o agotado
+  },
+  textoVacio: {
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+  },
 });
 
 
