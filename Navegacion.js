@@ -14,6 +14,9 @@ import Productos from './src/views/Productos.js';
 import Promedio from './src/views/Promedio.js';
 import Usuarios from './src/views/Usuarios.js';
 import ActividadesFirestoreScreen from './src/views/ActividadesFirestoreScreen.js';
+import ProductosRealtime from './src/views/ProductosRealtime.js';
+import CalculoIMC from './src/views/CalculoIMC.js';
+
 
 const Tab = createBottomTabNavigator();
 function Mytabs() {
@@ -58,9 +61,29 @@ function Mytabs() {
                         <FontAwesome name="tasks" size={30} color={color} />
                     ),
                 }} />
+            {}
+            <Tab.Screen 
+                name="ProductosRT" 
+                component={ProductosRealtime} 
+                options={{
+                    title: "Productos (RT)",
+                    tabBarLabel: 'Productos RT',
+                    tabBarIcon: ({ color, size }) => (
+                        <FontAwesome name="database" size={24} color={color} />
+                    ),
+                }} />
+            <Tab.Screen 
+                name="CalculoIMC" 
+                component={CalculoIMC} 
+                options={{
+                    title: "Calculadora IMC",
+                    tabBarLabel: 'IMC',
+                    tabBarIcon: ({ color, size }) => (
+                        <FontAwesome name="calculator" size={24} color={color} />
+                    ),
+                }} />
             <Tab.Screen 
                 name="Logout"
-                // No renderiza un componente, solo ejecuta una acción
                 component={() => null} 
                 options={{
                     tabBarLabel: 'Cerrar Sesión',
@@ -69,9 +92,8 @@ function Mytabs() {
                     ),
                 }}
                 listeners={{
-                    // Al presionar la pestaña, cerramos la sesión
                     tabPress: (e) => {
-                        e.preventDefault(); // Prevenimos la navegación
+                        e.preventDefault(); 
                         signOut(auth);
                     },
                 }}
