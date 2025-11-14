@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, SafeAreaView, Text, Button, Alert } from 'react-native'; 
 import { useNavigation } from '@react-navigation/native';  
 import { db } from '../database/firebaseconfig';
-import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, addDoc } from 'firebase/firestore';
 import FormularioProductos from '../components/FormularioProductos';
 import TablaProductos from '../components/TablaProductos';
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as Clipboard from "expo-clipboard";
+import * as DocumentPicker from "expo-document-picker";
 
 const arrayBufferToBase64 = (buffer) => {
   let binary = '';
@@ -105,7 +106,6 @@ const Productos = () => {
         throw new Error(`Error HTTP: ${response.status}`);
       }
   
-      // 3. Recibir, convertir y guardar el archivo
       const arrayBuffer = await response.arrayBuffer();
       const base64 = arrayBufferToBase64(arrayBuffer);
       const fileUri = FileSystem.documentDirectory + "reporte_productos.xlsx";
@@ -114,7 +114,6 @@ const Productos = () => {
         encoding: FileSystem.EncodingType.Base64
       });
   
-      // 4. Abrir el menú "Compartir"
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -127,6 +126,52 @@ const Productos = () => {
     } catch (error) {
       console.error("Error generando Excel:", error);
       alert("Error al generar el reporte de Excel: " + error.message);
+    }
+  };
+
+  const extraerYGuardarMascotas = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
+        copyToCacheDirectory: true,
+      });
+  
+      if (result.canceled || !result.assets) {
+        console.log("Selección de archivo cancelada.");
+        return;
+      }
+  
+      const { uri } = result.assets[0];
+      const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+  
+      const response = await fetch("https://xba16ydjga.execute-api.us-east-2.amazonaws.com/extraerexcel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archivoBase64: base64 }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error del servidor: ${errorData.mensaje || response.status}`);
+      }
+
+      const { datos } = await response.json();
+  
+      let guardados = 0;
+      for (const mascota of datos) {
+         await addDoc(collection(db, "mascotas"), {
+         nombre: mascota.nombre || "",
+         edad: parseInt(mascota.edad) || 0,
+         raza: mascota.raza || "",
+       });
+         guardados++;
+      }
+      Alert.alert("Éxito", `Se importaron y guardaron ${guardados} mascotas.`);
+      cargarDatos();
+  
+    } catch (error) {
+      console.error("Error al importar productos:", error);
+      Alert.alert("Error", "Ocurrió un error al importar: " + error.message);
     }
   };
   const indiceDelUltimoElemento = paginaActual * elementosPorPagina;
@@ -156,6 +201,9 @@ const Productos = () => {
           onPress={generarExcel}
           color="#28a745" 
         />
+        <View style={{ marginVertical: 10 }}>
+  <Button title="Extraer Mascotas desde Excel" onPress={extraerYGuardarMascotas} />
+</View>
       </View>
 
       <FormularioProductos cargarDatos={cargarDatos} />
