@@ -174,6 +174,7 @@ const Productos = () => {
       Alert.alert("Error", "Ocurrió un error al importar: " + error.message);
     }
   };
+  
   const indiceDelUltimoElemento = paginaActual * elementosPorPagina;
   const indiceDelPrimerElemento = indiceDelUltimoElemento - elementosPorPagina;
   const productosPaginados = productos.slice(
@@ -181,6 +182,44 @@ const Productos = () => {
     indiceDelUltimoElemento
   );
 
+const extraerYGuardarbiscicletas = async () => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
+      copyToCacheDirectory: true,
+    });
+
+    if (result.canceled || !result.assets) return;
+
+    const { uri } = result.assets[0];
+    const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+
+    const response = await fetch("https://xba16ydjga.execute-api.us-east-2.amazonaws.com/extraerexcel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archivoBase64: base64 }),
+    });
+
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    const { datos } = await response.json();
+
+    let guardados = 0;
+    for (const bicicleta of datos) {
+       await addDoc(collection(db, "bicicletas"), {
+         marca: bicicleta.marca || "",
+         modelo: bicicleta.modelo || "",
+          tipo: bicicleta.tipo || "",
+         precio: parseInt(bicicleta.precio) || 0,
+         color: bicicleta.color || "",
+       });
+       guardados++;
+    }
+    Alert.alert("Éxito", `Se guardaron ${guardados} bicicletas.`);
+
+  } catch (error) {
+    Alert.alert("Error", error.message);
+  }
+};
   return (
   <SafeAreaView style={styles.safeArea}>
     <View style={styles.container}>
@@ -201,8 +240,17 @@ const Productos = () => {
           onPress={generarExcel}
           color="#28a745" 
         />
+        <Button 
+  title="Extraer Mascotas desde Excel"
+   onPress={extraerYGuardarMascotas} />
+    <Button 
+  title="Extraer biscicletas desde Excel"
+   onPress={extraerYGuardarbiscicletas} 
+   color="#11491eff" 
+   />
         <View style={{ marginVertical: 10 }}>
-  <Button title="Extraer Mascotas desde Excel" onPress={extraerYGuardarMascotas} />
+  
+   
 </View>
       </View>
 
